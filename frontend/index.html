@@ -935,7 +935,7 @@ async function sendOTP() {
   try {
 
     const res = await fetch(
-      'http://localhost:5000/api/send-otp',
+      'https://marketatlas-api.onrender.com/api/send-otp',
       {
         method: 'POST',
         headers: {
@@ -1057,7 +1057,7 @@ async function verifyOTP() {
     console.log("Phone:", verifiedPhone);
     console.log("OTP Entered:", code);
     const res = await fetch(
-      'http://localhost:5000/api/verify-otp',
+      'https://marketatlas-api.onrender.com/api/verify-otp',
       {
         method: 'POST',
         headers: {
@@ -1128,7 +1128,7 @@ async function completeJoin() {
   try {
 
   const response = await fetch(
-    "http://localhost:5000/api/register",
+    "https://marketatlas-api.onrender.com/api/register",
     {
       method: "POST",
       headers: {
