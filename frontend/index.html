@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MarketAtlas — AI Powered Stock Alerts on WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --indigo: #000000;
+    --indigo-deep: #000000;
+    --indigo-mid: #173a12;
+    --indigo-soft: #1b6317;
+    --cyan: rgb(48, 191, 0);
+    --cyan-dim: rgba(48, 191, 0, 0.758);
+    --cyan-glow: rgba(48, 191, 0, 0.12);
+    --white: #F8F9FF;
+    --white-dim: rgba(248,249,255,0.7);
+    --white-mute: rgba(248,249,255,0.35);
+    --white-ghost: rgba(248,249,255,0.08);
+    --green: #00E5A0;
+    --red: #FF5C6A;
+    --amber: #FFB547;
+    --border: rgba(0,212,255,0.15);
+    --border-soft: rgba(248,249,255,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--indigo-deep);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── TICKER STRIP ─── */
+  .ticker-wrap {
+    background: var(--indigo-mid);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-label {
+    background: var(--cyan);
+    color: var(--indigo-deep);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 0 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.08em;
+  }
+  .ticker-track {
+    display: flex;
+    animation: tickerScroll 30s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 0 28px;
+    color: var(--white-dim);
+    border-right: 1px solid var(--border-soft);
+  }
+  .ticker-item .up { color: var(--green); }
+  .ticker-item .down { color: var(--red); }
+  .ticker-item .sym { color: var(--white); font-weight: 500; margin-right: 8px; }
+
+  @keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 6%;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--cyan); }
+  .nav-pill {
+    background: var(--white-ghost);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: var(--cyan);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav-pill:hover { background: var(--cyan-glow); }
+
+  /* ─── HERO ─── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 60px;
+    align-items: center;
+    padding: 80px 6% 80px;
+    min-height: calc(100vh - 110px);
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cyan-glow);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--cyan);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow .dot {
+    width: 6px; height: 6px;
+    background: var(--cyan);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 58px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--white);
+    margin-bottom: 22px;
+  }
+  .hero h1 .accent { color: var(--cyan); }
+  .hero p {
+    font-size: 17px;
+    color: var(--white-dim);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 40px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 36px;
+    margin-top: 12px;
+  }
+  .stat-item .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--white);
+  }
+  .stat-item .lbl {
+    font-size: 12px;
+    color: var(--white-mute);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .stat-divider {
+    width: 1px;
+    background: var(--border-soft);
+    margin: 4px 0;
+  }
+
+  /* ─── CARD (shared by all steps) ─── */
+  .card {
+    background: var(--indigo-mid);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 180px; height: 180px;
+    background: var(--cyan-glow);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .card-step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+  .card h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .card .sub {
+    font-size: 14px;
+    color: var(--white-mute);
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+  .card .sub strong { color: var(--white-dim); font-weight: 500; }
+
+  /* ─── FORM ELEMENTS ─── */
+  .field {
+    margin-bottom: 16px;
+  }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--white-mute);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--indigo-deep);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-glow);
+  }
+  .input-prefix {
+    padding: 0 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--white-dim);
+    border-right: 1px solid var(--border-soft);
+    height: 50px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+  .input-wrap input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--white);
+    padding: 0 16px;
+    height: 50px;
+    flex: 1;
+    width: 100%;
+  }
+  .input-wrap input::placeholder { color: var(--white-mute); font-size: 14px; }
+
+  input[type="text"].plain, input[type="email"].plain {
+    background: var(--indigo-deep);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    outline: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    color: var(--white);
+    padding: 0 16px;
+    height: 50px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"].plain:focus, input[type="email"].plain:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-glow);
+  }
+  input[type="text"].plain::placeholder, input[type="email"].plain::placeholder {
+    color: var(--white-mute);
+  }
+
+  /* ─── OTP BOXES ─── */
+  .otp-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .otp-grid input {
+    width: 100%;
+    min-width: 0;
+    height: 58px;
+    background: var(--indigo-deep);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    caret-color: var(--cyan);
+  }
+  .otp-grid input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-glow);
+  }
+  .otp-grid input.filled { border-color: var(--cyan); color: var(--cyan); }
+
+  /* ─── BUTTON ─── */
+  .btn {
+    width: 100%;
+    height: 52px;
+    background: var(--cyan);
+    color: var(--indigo-deep);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    border: 2px solid var(--indigo-deep);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .resend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--white-mute);
+  }
+  .resend-btn {
+    color: var(--cyan);
+    background: none;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .resend-btn:disabled { color: var(--white-mute); cursor: default; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+  .progress-seg {
+    height: 3px;
+    flex: 1;
+    background: var(--border-soft);
+    border-radius: 2px;
+    transition: background 0.4s;
+  }
+  .progress-seg.done { background: var(--cyan); }
+  .progress-seg.active { background: var(--cyan); opacity: 0.5; }
+
+  /* ─── SUCCESS CARD ─── */
+  .success-icon {
+    width: 72px; height: 72px;
+    background: rgba(0,229,160,0.1);
+    border: 1px solid rgba(0,229,160,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 32px;
+  }
+  .wa-preview {
+    background: #0f1e13;
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+  .wa-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .wa-avatar {
+    width: 42px; height: 42px;
+    background: #128C7E;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .wa-name { font-size: 15px; font-weight: 600; color: var(--white); }
+  .wa-status { font-size: 11px; color: rgba(0,229,160,0.8); margin-top: 1px; }
+  .wa-bubble {
+    background: #1f2b22;
+    border-radius: 0 12px 12px 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .wa-bubble .tag {
+    display: inline-block;
+    background: rgba(0,229,160,0.15);
+    color: var(--green);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    margin: 0 2px;
+  }
+  .wa-time { font-size: 10px; color: rgba(255,255,255,0.3); text-align: right; margin-top: 4px; }
+
+  /* ─── FEATURES SECTION ─── */
+  .features {
+    padding: 80px 6%;
+    border-top: 1px solid var(--border-soft);
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+  .section-title {
+    font-size: clamp(26px, 3.5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 60px;
+    max-width: 520px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--white-ghost);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    padding: 28px 24px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .feature-card:hover {
+    border-color: var(--border);
+    background: var(--indigo-mid);
+  }
+  .feature-icon {
+    width: 44px; height: 44px;
+    background: var(--cyan-glow);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 18px;
+  }
+  .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--white); }
+  .feature-card p { font-size: 13px; color: var(--white-mute); line-height: 1.6; }
+
+  /* ─── STEPS SECTION ─── */
+  .how {
+    padding: 80px 6%;
+    background: var(--indigo-mid);
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 48px;
+    position: relative;
+  }
+  .steps-grid::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .step {
+    text-align: center;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .step-num {
+    width: 56px; height: 56px;
+    background: var(--indigo-deep);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--cyan);
+  }
+  .step h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: var(--white); }
+  .step p { font-size: 13px; color: var(--white-mute); line-height: 1.5; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 40px 6%;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--white-mute);
+  }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--indigo-mid);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 12px 24px;
+    font-size: 14px;
+    color: var(--white);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ─── SCREEN STATES ─── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ─── ERROR ─── */
+  .error-msg {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 6px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; padding: 60px 6%; }
+    .hero-stats { gap: 20px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .steps-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .steps-grid::before { display: none; }
+  }
+  @media (max-width: 560px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .card { padding: 28px 22px; }
+    nav { padding: 16px 5%; }
+    .hero h1 { font-size: 32px; }
+    .otp-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  /* ─── INTEGRATION COMMENT TOOLTIP ─── */
+  .dev-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,181,71,0.1);
+    border: 1px solid rgba(255,181,71,0.25);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--amber);
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── TICKER ─── 
+<div class="ticker-wrap">
+  <div class="ticker-label">LIVE</div>
+  <div style="overflow:hidden;flex:1;">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+</div>-->
+
+<!-- ─── NAV ─── -->
+<nav>
+  <div class="logo">Market<span>Atlas</span></div>
+  <!--<button class="nav-pill" onclick="scrollToCard()">Join Free →</button>-->
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow"><div class="dot"></div> AI-Powered Stock Intelligence</div>
+    <h1>Market alerts that<br><span class="accent">reach you first.</span></h1>
+    <p>Get AI-powered real-time alerts on market data and stocks — straight to your WhatsApp. No app downloads. No logins. Just signals that matter.</p>
+    <!-- <div class="hero-stats">
+      <div class="stat-item">
+        <div class="num">14,800+</div>
+        <div class="lbl">Active Members</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="num">3.2s</div>
+        <div class="lbl">Avg alert delay</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="num">98.4%</div>
+        <div class="lbl">Uptime</div>
+      </div> -->
+    </div>
+  </div>
+
+  <!-- ─── CARD AREA ─── -->
+  <div id="cardWrap">
+
+    <!-- STEP 1: PHONE -->
+    <div class="card screen active" id="screenPhone">
+      <div class="progress-bar">
+        <div class="progress-seg done"></div>
+        <div class="progress-seg"></div>
+        <div class="progress-seg"></div>
+      </div>
+      <div class="card-step">Step 1 of 3</div>
+      <h2>Enter your WhatsApp number</h2>
+      <p class="sub">We'll send a one-time OTP to verify your WhatsApp number.</p>
+      <div class="field">
+        <label>Mobile Number</label>
+        <div class="input-wrap">
+          <div class="input-prefix">🇮🇳 +91</div>
+          <input type="tel" id="phoneInput" maxlength="10" placeholder="Your 10 digit phone number" oninput="this.value=this.value.replace(/\D/g,'')" />
+        </div>
+        <div class="error-msg" id="phoneErr">Please enter a valid 10-digit mobile number.</div>
+      </div>
+      <!--<div class="dev-badge">⚙ Integration: Twilio / MSG91 SMS OTP API</div>-->
+      <button class="btn" id="sendOtpBtn" onclick="sendOTP()" style="margin-top:20px;">Send OTP</button>
+    </div>
+
+    <!-- STEP 2: OTP -->
+    <div class="card screen" id="screenOTP">
+      <div class="progress-bar">
+        <div class="progress-seg done"></div>
+        <div class="progress-seg done"></div>
+        <div class="progress-seg"></div>
+      </div>
+      <div class="card-step">Step 2 of 3</div>
+      <h2>Verify your number</h2>
+      <p class="sub">OTP sent to <strong id="phoneDisplay"></strong>. Enter the 6-digit code below.</p>
+      <div class="otp-grid" id="otpGrid">
+        <input type="tel" maxlength="1" class="otp-box" />
+        <input type="tel" maxlength="1" class="otp-box" />
+        <input type="tel" maxlength="1" class="otp-box" />
+        <input type="tel" maxlength="1" class="otp-box" />
+        <input type="tel" maxlength="1" class="otp-box" />
+        <input type="tel" maxlength="1" class="otp-box" />
+      </div>
+      <div class="error-msg" id="otpErr">Incorrect OTP. Please try again.</div>
+      <button class="btn" id="verifyBtn" onclick="verifyOTP()">Verify OTP</button>
+      <div class="resend-row">
+        <span id="resendTimer">Resend in <b id="timerCount">30</b>s</span>
+        <button class="resend-btn" id="resendBtn" onclick="resendOTP()" disabled>Resend OTP</button>
+      </div>
+      <div class="dev-badge" style="margin-top:12px;">⚙ Integration: Verify code against stored hash (Redis/DB)</div>
+    </div>
+
+    <!-- STEP 3: PROFILE -->
+    <div class="card screen" id="screenProfile">
+      <div class="progress-bar">
+        <div class="progress-seg done"></div>
+        <div class="progress-seg done"></div>
+        <div class="progress-seg done"></div>
+      </div>
+      <div class="card-step">Step 3 of 3</div>
+      <h2>Almost there!</h2>
+      <p class="sub">Tell us your name and email to complete your membership.</p>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" class="plain" id="nameInput" placeholder="Your Full Name" />
+        <div class="error-msg" id="nameErr">Please enter your full name.</div>
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" class="plain" id="emailInput" placeholder="username@example.com" />
+        <div class="error-msg" id="emailErr">Please enter a valid email address.</div>
+      </div>
+      <!-- <div class="dev-badge" style="margin-bottom:16px;">⚙ Integration: Wati.io API → Add to community & create private chat</div>-->
+      <button class="btn" id="joinBtn" onclick="completeJoin()">Join MarketAtlas →</button>
+    </div>
+
+    <!-- STEP 4: SUCCESS -->
+    <div class="card screen" id="screenSuccess">
+      <div style="text-align:center; padding: 8px 0;">
+        <div class="success-icon">✅</div>
+        <h2 style="margin-bottom:8px;">You're in!</h2>
+        <p class="sub" id="successMsg" style="margin-bottom:0;"></p>
+      </div>
+      <div class="wa-preview">
+        <div class="wa-header">
+          <div class="wa-avatar">📈</div>
+          <div>
+            <div class="wa-name">MarketAtlas AI</div>
+            <div class="wa-status">● Online — AI active</div>
+          </div>
+        </div>
+        <div class="wa-bubble">
+          👋 Welcome <span class="tag" id="waBubbleName"></span>! You're now part of MarketAtlas.<br><br>
+          
+          You'll soon be added to our exclusive <b>MarketAtlas WhatsApp Community</b> where members get:
+          
+          <br><br>
+          📊 Pre-market and post-market analysis<br>
+          💡 Trading opportunities and key market levels<br>
+          🚀 IPO alerts, GMP updates &amp; listing insights<br>
+          🔔 Important news, sector trends &amp; learning resources
+          
+          <div class="wa-time">Just now · ✓✓</div>
+        </div>
+        <div class="wa-bubble" style="margin-bottom:0;">
+          🤝 We're excited to have you on board.
+
+              <br><br>
+              Once you're added to the group, you'll be able to connect with fellow traders, stay updated on market developments, and receive timely insights from the MarketAtlas team.
+
+        <div class="wa-time">Just now · ✓✓</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cardWrap -->
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="how">
+  <div class="section-label">How it works</div>
+  <div class="section-title">From signup to signals in under 2 minutes.</div>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h4>Verify your number</h4>
+      <p>Enter your WhatsApp number and verify with an OTP — takes 30 seconds.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h4>Add your profile</h4>
+      <p>We collect your name and email for personalised alert preferences.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h4>Join the community</h4>
+      <p>You're added to our private WhatsApp community — members stay anonymous.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h4>Receive AI alerts</h4>
+      <p>Our AI engine monitors markets 24×7 and pushes alerts the moment it matters.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ─── -->
+<section class="features">
+  <div class="section-label">What you get</div>
+  <div class="section-title">Everything a trader needs, on WhatsApp.</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📡</div>
+      <h3>Real-time F&O alerts</h3>
+      <p>OI buildup, PCR shifts, and max pain levels delivered the moment our AI detects a significant change.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <h3>IPO intelligence</h3>
+      <p>Live GMP tracking, subscription status by category, and listing day price targets — all in plain language.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>Private AI chat</h3>
+      <p>Ask anything — "What's the PCR for Nifty right now?" or "Any IPOs opening this week?" — get instant answers.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Anonymous community</h3>
+      <p>You're in a broadcast-style group. Members can't see each other's names or numbers.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Market breadth reports</h3>
+      <p>Morning and closing briefings covering advances, declines, sector performance, and FII/DII activity.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Intraday news</h3>
+      <p>AI-identified breakout candidates, support/resistance levels, and risk/reward setups before market open.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="logo" style="font-size:15px;">Market<span style="color:var(--cyan)">Atlas</span></div>
+  <div>© 2026 MarketAtlas · Built for Indian markets</div>
+</footer>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── TICKER DATA ── */
+const tickers = [
+  {sym:'NIFTY 50',price:'24,632.10',ch:'+0.43%',up:true},
+  {sym:'SENSEX',price:'81,224.75',ch:'-0.12%',up:false},
+  {sym:'RELIANCE',price:'2,934.50',ch:'+1.2%',up:true},
+  {sym:'TCS',price:'4,012.00',ch:'-0.5%',up:false},
+  {sym:'HDFC BANK',price:'1,724.30',ch:'+0.8%',up:true},
+  {sym:'INFOSYS',price:'1,876.55',ch:'+0.3%',up:true},
+  {sym:'NIFTYBANK',price:'52,140.90',ch:'-0.22%',up:false},
+  {sym:'ADANIPORTS',price:'1,287.40',ch:'+2.1%',up:true},
+  {sym:'ITC',price:'464.25',ch:'-0.7%',up:false},
+  {sym:'BAJFINANCE',price:'7,534.00',ch:'+1.5%',up:true},
+];
+
+function buildTicker() {
+  const track = document.getElementById('tickerTrack');
+
+  if (!track) return;
+
+  const doubled = [...tickers, ...tickers];
+
+  track.innerHTML = doubled.map(t =>
+    `<span class="ticker-item">
+      <span class="sym">${t.sym}</span>
+      ${t.price}
+    </span>`
+  ).join('');
+}
+/*buildTicker();*/
+
+/* ── STATE ── */
+let verifiedPhone = '';
+let timerInterval = null;
+
+function scrollToCard() {
+  document.getElementById('cardWrap').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showToast(msg, duration=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+/* ── STEP 1: SEND OTP ── */
+async function sendOTP() {
+
+  const phone =
+    document.getElementById('phoneInput').value.trim();
+
+  const err =
+    document.getElementById('phoneErr');
+
+  if (!/^\d{10}$/.test(phone)) {
+    err.classList.add('show');
+    return;
+  }
+
+  err.classList.remove('show');
+
+  const btn =
+    document.getElementById('sendOtpBtn');
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  btn.textContent = '';
+
+  try {
+
+    const res = await fetch(
+      'http://localhost:5000/api/send-otp',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phone
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      verifiedPhone = phone;
+      document.getElementById(
+        'phoneDisplay'
+      ).textContent =
+        '+91 ' + phone;
+      showScreen('screenOTP');
+      setupOTPInputs();
+      startTimer();
+      showToast(
+        'OTP generated successfully'
+      );
+    }
+
+  } catch (err) {
+    console.error(err);
+    showToast(
+      'Backend connection failed'
+    );
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    btn.textContent = 'Send OTP';
+  }
+}
+
+/* ── OTP INPUT LOGIC ── */
+function setupOTPInputs() {
+  const boxes = document.querySelectorAll('.otp-box');
+  boxes.forEach((box, i) => {
+    box.value = '';
+    box.classList.remove('filled');
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/\D/,'');
+      if (box.value) {
+        box.classList.add('filled');
+        if (i < boxes.length - 1) boxes[i+1].focus();
+      } else {
+        box.classList.remove('filled');
+      }
+    });
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && i > 0) boxes[i-1].focus();
+    });
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+      [...text].forEach((ch, idx) => {
+        if (boxes[idx]) { boxes[idx].value = ch; boxes[idx].classList.add('filled'); }
+      });
+      if (boxes[Math.min(text.length, 5)]) boxes[Math.min(text.length, 5)].focus();
+    });
+  });
+  boxes[0].focus();
+}
+
+function startTimer() {
+  let count = 30;
+  const el = document.getElementById('timerCount');
+  const resendBtn = document.getElementById('resendBtn');
+  const timerRow = document.getElementById('resendTimer');
+  resendBtn.disabled = true;
+  timerRow.style.display = '';
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    count--;
+    el.textContent = count;
+    if (count <= 0) {
+      clearInterval(timerInterval);
+      timerRow.style.display = 'none';
+      resendBtn.disabled = false;
+    }
+  }, 1000);
+}
+
+function resendOTP() {
+  showToast('OTP resent!');
+  startTimer();
+  document.getElementById('resendTimer').style.display = '';
+  /*
+   * ── REAL INTEGRATION ──────────────────────────────────────────────────────
+   * POST /api/resend-otp  { phone: "+91" + verifiedPhone }
+   * ─────────────────────────────────────────────────────────────────────────
+   */
+}
+
+/* ── STEP 2: VERIFY OTP ── */
+async function verifyOTP() {
+
+  const boxes =
+    document.querySelectorAll('.otp-box');
+
+  const code =
+    [...boxes].map(b => b.value).join('');
+
+  const err =
+    document.getElementById('otpErr');
+
+  if (code.length !== 6) {
+    err.classList.add('show');
+    return;
+  }
+
+  try {
+
+    console.log("Phone:", verifiedPhone);
+    console.log("OTP Entered:", code);
+    const res = await fetch(
+      'http://localhost:5000/api/verify-otp',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phone: verifiedPhone,
+          otp: code
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      err.classList.remove('show');
+
+      showToast('OTP verified');
+
+      showScreen('screenProfile');
+
+    } else {
+
+      err.classList.add('show');
+
+    }
+
+  } catch (e) {
+
+    console.error(e);
+
+    showToast('Verification failed');
+
+  }
+}
+
+  
+/* ── STEP 3: COMPLETE JOIN ── */
+async function completeJoin() {
+  const name = document.getElementById('nameInput').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
+  const nameErr = document.getElementById('nameErr');
+  const emailErr = document.getElementById('emailErr');
+  let valid = true;
+
+  if (!name || name.length < 2) { nameErr.classList.add('show'); valid = false; } else { nameErr.classList.remove('show'); }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailErr.classList.add('show'); valid = false; } else { emailErr.classList.remove('show'); }
+  if (!valid) return;
+
+  const btn = document.getElementById('joinBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  btn.textContent = '';
+
+  /*
+   * ── REAL INTEGRATION ──────────────────────────────────────────────────────
+   * POST /api/register  { phone, name, email }
+   * Backend should:
+   *   1. Save user to DB (PostgreSQL / MongoDB)
+   *   2. Call Wati.io API → POST /api/v1/sendSessionMessage or community invite
+   *      WATI Docs: https://docs.wati.io/
+   *      Add to WhatsApp Community (via Meta Cloud API if using official API)
+   *   3. Send welcome private message via Wati bot
+   *   4. Trigger AI welcome message (Claude / GPT via Wati webhook)
+   * ─────────────────────────────────────────────────────────────────────────
+   */
+  try {
+
+  const response = await fetch(
+    "http://localhost:5000/api/register",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        phone: verifiedPhone,
+        name,
+        email
+      })
+    }
+  );
+
+  const data = await response.json();
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  btn.textContent = 'Join MarketAtlas →';
+
+  if (data.success) {
+
+    const firstName = name.split(' ')[0];
+
+    document.getElementById('successMsg').textContent =
+      `Welcome, ${firstName}! Your account has been created successfully.`;
+
+    document.getElementById('waBubbleName').textContent =
+      firstName;
+
+    showScreen('screenSuccess');
+
+    showToast('🎉 Welcome to MarketAtlas!');
+
+  } else {
+
+    showToast('Failed to save user');
+
+  }
+
+} catch (error) {
+
+  console.error(error);
+
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  btn.textContent = 'Join MarketAtlas →';
+
+  showToast('Server connection failed');
+
+}
+}
+</script>
+</body>
+</html>
