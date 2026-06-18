@@ -892,6 +892,7 @@ function buildTicker() {
 
 /* ── STATE ── */
 let verifiedPhone = '';
+let msg91AccessToken = '';
 let timerInterval = null;
 
 function scrollToCard() {
@@ -934,41 +935,52 @@ async function sendOTP() {
 
   try {
 
-    const res = await fetch(
-      'https://marketatlas-api.onrender.com/api/send-otp',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phone
-        })
+    window.sendOtp(
+      "91" + phone,
+
+      (data) => {
+
+        console.log("OTP sent", data);
+
+        verifiedPhone = phone;
+
+        document.getElementById(
+          'phoneDisplay'
+        ).textContent =
+          '+91 ' + phone;
+
+        showScreen('screenOTP');
+
+        setupOTPInputs();
+
+        startTimer();
+
+        showToast('OTP sent');
+
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        btn.textContent = 'Send OTP';
+
+      },
+
+      (error) => {
+
+        console.error(error);
+
+        showToast('Failed to send OTP');
+
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        btn.textContent = 'Send OTP';
       }
     );
 
-    const data = await res.json();
-
-    if (data.success) {
-      verifiedPhone = phone;
-      document.getElementById(
-        'phoneDisplay'
-      ).textContent =
-        '+91 ' + phone;
-      showScreen('screenOTP');
-      setupOTPInputs();
-      startTimer();
-      showToast(
-        'OTP generated successfully'
-      );
-    }
-
   } catch (err) {
+
     console.error(err);
-    showToast(
-      'Backend connection failed'
-    );
-  } finally {
+
+    showToast('MSG91 failed');
+
     btn.classList.remove('loading');
     btn.disabled = false;
     btn.textContent = 'Send OTP';
@@ -1025,8 +1037,28 @@ function startTimer() {
 }
 
 function resendOTP() {
-  showToast('OTP resent!');
-  startTimer();
+  window.retryOtp(
+  (data) => {
+
+    console.log(data);
+
+    showToast('OTP resent');
+
+    startTimer();
+
+    document.getElementById(
+      'resendTimer'
+    ).style.display = '';
+
+  },
+
+  (error) => {
+
+    console.error(error);
+
+    showToast('Failed to resend OTP');
+  }
+  );
   document.getElementById('resendTimer').style.display = '';
   /*
    * ── REAL INTEGRATION ──────────────────────────────────────────────────────
@@ -1052,47 +1084,36 @@ async function verifyOTP() {
     return;
   }
 
-  try {
+  window.verifyOtp(
 
-    console.log("Phone:", verifiedPhone);
-    console.log("OTP Entered:", code);
-    const res = await fetch(
-      'https://marketatlas-api.onrender.com/api/verify-otp',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phone: verifiedPhone,
-          otp: code
-        })
-      }
-    );
+    code,
 
-    const data = await res.json();
+    (data) => {
 
-    if (data.success) {
+      console.log("VERIFY SUCCESS", data);
+
+      msg91AccessToken =
+        data.token ||
+        data.accessToken ||
+        data["access-token"] ||
+        '';
 
       err.classList.remove('show');
 
       showToast('OTP verified');
 
       showScreen('screenProfile');
+    },
 
-    } else {
+    (error) => {
+
+      console.error(error);
 
       err.classList.add('show');
 
+      showToast('Invalid OTP');
     }
-
-  } catch (e) {
-
-    console.error(e);
-
-    showToast('Verification failed');
-
-  }
+  );
 }
 
   
@@ -1181,5 +1202,20 @@ async function completeJoin() {
 }
 }
 </script>
+
+<script>
+var configuration = {
+  widgetId: "36667268764d353537393730",
+  tokenAuth: "YOUR_WIDGET_TOKEN",
+  exposeMethods: true
+};
+</script>
+
+<script
+  type="text/javascript"
+  onload="initSendOTP(configuration)"
+  src="https://verify.msg91.com/otp-provider.js">
+</script>
+
 </body>
 </html>
