@@ -624,6 +624,26 @@
     margin-top: 10px;
     font-family: 'JetBrains Mono', monospace;
   }
+
+  .whatsapp-join-btn {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px;
+  text-align: center;
+  text-decoration: none;
+  background: #25D366;
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: opacity 0.2s;
+}
+
+.whatsapp-join-btn:hover {
+  opacity: 0.9;
+}
+
 </style>
 </head>
 <body>
@@ -743,43 +763,56 @@
     </div>
 
     <!-- STEP 4: SUCCESS -->
-    <div class="card screen" id="screenSuccess">
-      <div style="text-align:center; padding: 8px 0;">
-        <div class="success-icon">✅</div>
-        <h2 style="margin-bottom:8px;">You're in!</h2>
-        <p class="sub" id="successMsg" style="margin-bottom:0;"></p>
-      </div>
-      <div class="wa-preview">
-        <div class="wa-header">
-          <div class="wa-avatar">📈</div>
-          <div>
-            <div class="wa-name">MarketAtlas AI</div>
-            <div class="wa-status">● Online — AI active</div>
-          </div>
-        </div>
-        <div class="wa-bubble">
-          👋 Welcome <span class="tag" id="waBubbleName"></span>! You're now part of MarketAtlas.<br><br>
-          
-          You'll soon be added to our exclusive <b>MarketAtlas WhatsApp Community</b> where members get:
-          
-          <br><br>
-          📊 Pre-market and post-market analysis<br>
-          💡 Trading opportunities and key market levels<br>
-          🚀 IPO alerts, GMP updates &amp; listing insights<br>
-          🔔 Important news, sector trends &amp; learning resources
-          
-          <div class="wa-time">Just now · ✓✓</div>
-        </div>
-        <div class="wa-bubble" style="margin-bottom:0;">
-          🤝 We're excited to have you on board.
+<!-- STEP 4: SUCCESS -->
+<div class="card screen" id="screenSuccess">
+  <div style="text-align:center; padding: 8px 0;">
+    <div class="success-icon">✅</div>
+    <h2 style="margin-bottom:8px;">You're in!</h2>
+    <p class="sub" id="successMsg" style="margin-bottom:16px;"></p>
 
-              <br><br>
-              Once you're added to the group, you'll be able to connect with fellow traders, stay updated on market developments, and receive timely insights from the MarketAtlas team.
+    <a
+      href="https://chat.whatsapp.com/KBCmR9dd9etlelYWuloRxy"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="whatsapp-join-btn"
+    >
+      Join WhatsApp Community 🚀
+    </a>
+  </div>
 
-        <div class="wa-time">Just now · ✓✓</div>
-        </div>
+  <div class="wa-preview">
+    <div class="wa-header">
+      <div class="wa-avatar">📈</div>
+      <div>
+        <div class="wa-name">MarketAtlas AI</div>
+        <div class="wa-status">● Online — AI active</div>
       </div>
     </div>
+
+    <div class="wa-bubble">
+      👋 Welcome <span class="tag" id="waBubbleName"></span>! You're now part of MarketAtlas.<br><br>
+
+      Join our exclusive <b>MarketAtlas WhatsApp Community</b> using the button above.
+
+      <br><br>
+      📊 Pre-market and post-market analysis<br>
+      💡 Trading opportunities and key market levels<br>
+      🚀 IPO alerts, GMP updates &amp; listing insights<br>
+      🔔 Important news, sector trends &amp; learning resources
+
+      <div class="wa-time">Just now · ✓✓</div>
+    </div>
+
+    <div class="wa-bubble" style="margin-bottom:0;">
+      🤝 We're excited to have you on board.
+
+      <br><br>
+      Once you join the community, you'll be able to connect with fellow traders, stay updated on market developments, and receive timely insights from the MarketAtlas team.
+
+      <div class="wa-time">Just now · ✓✓</div>
+    </div>
+  </div>
+</div>
 
   </div><!-- /cardWrap -->
 </section>
