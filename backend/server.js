@@ -63,6 +63,8 @@ app.post("/api/register", async (req, res) => {
             .from("users")
             .insert([{ phone, name }])
             .select();
+        
+        console.log("INSERT RESULT:", JSON.stringify({ data, error }));
 
         if (error) {
             console.error("Supabase error:", error);
