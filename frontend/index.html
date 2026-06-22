@@ -747,17 +747,17 @@
       </div>
       <div class="card-step">Step 3 of 3</div>
       <h2>Almost there!</h2>
-      <p class="sub">Tell us your name and email to complete your membership.</p>
+      <p class="sub">Tell us your name to complete your membership.</p>
       <div class="field">
         <label>Full Name</label>
         <input type="text" class="plain" id="nameInput" placeholder="Your Full Name" />
         <div class="error-msg" id="nameErr">Please enter your full name.</div>
       </div>
       <div class="field">
-        <label>Email Address</label>
+      <!--   <label>Email Address</label>
         <input type="email" class="plain" id="emailInput" placeholder="username@example.com" />
         <div class="error-msg" id="emailErr">Please enter a valid email address.</div>
-      </div>
+      </div>-->
       <!-- <div class="dev-badge" style="margin-bottom:16px;">⚙ Integration: Wati.io API → Add to community & create private chat</div>-->
       <button class="btn" id="joinBtn" onclick="completeJoin()">Join MarketAtlas →</button>
     </div>
@@ -770,14 +770,14 @@
     <h2 style="margin-bottom:8px;">You're in!</h2>
     <p class="sub" id="successMsg" style="margin-bottom:16px;"></p>
 
-    <a
-      href="https://chat.whatsapp.com/KBCmR9dd9etlelYWuloRxy"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="whatsapp-join-btn"
-    >
-      Join WhatsApp Community 🚀
-    </a>
+<a
+  href="https://whatsapp.com/channel/0029VbD61vYIt5rnVQJxFL2r"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="whatsapp-join-btn"
+>
+  Follow Market Insights 🚀
+</a>
   </div>
 
   <div class="wa-preview">
@@ -792,7 +792,7 @@
     <div class="wa-bubble">
       👋 Welcome <span class="tag" id="waBubbleName"></span>! You're now part of MarketAtlas.<br><br>
 
-      Join our exclusive <b>MarketAtlas WhatsApp Community</b> using the button above.
+      Join our exclusive <b>Market Insights WhatsApp Channel</b> using the button above.
 
       <br><br>
       📊 Pre-market and post-market analysis<br>
@@ -807,7 +807,7 @@
       🤝 We're excited to have you on board.
 
       <br><br>
-      Once you join the community, you'll be able to connect with fellow traders, stay updated on market developments, and receive timely insights from the MarketAtlas team.
+      Once you follow the channel, you'll receive market insights, trading opportunities, IPO updates, important announcements, and timely updates directly from the MarketAtlas team.
 
       <div class="wa-time">Just now · ✓✓</div>
     </div>
@@ -830,7 +830,7 @@
     <div class="step">
       <div class="step-num">02</div>
       <h4>Add your profile</h4>
-      <p>We collect your name and email for personalised alert preferences.</p>
+      <p>We collect your name for personalised alert preferences.</p>
     </div>
     <div class="step">
       <div class="step-num">03</div>
@@ -1153,13 +1153,13 @@ async function verifyOTP() {
 /* ── STEP 3: COMPLETE JOIN ── */
 async function completeJoin() {
   const name = document.getElementById('nameInput').value.trim();
-  const email = document.getElementById('emailInput').value.trim();
+  /*const email = document.getElementById('emailInput').value.trim();*/
   const nameErr = document.getElementById('nameErr');
-  const emailErr = document.getElementById('emailErr');
+  /*const emailErr = document.getElementById('emailErr');*/
   let valid = true;
 
   if (!name || name.length < 2) { nameErr.classList.add('show'); valid = false; } else { nameErr.classList.remove('show'); }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailErr.classList.add('show'); valid = false; } else { emailErr.classList.remove('show'); }
+/* if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailErr.classList.add('show'); valid = false; } else { emailErr.classList.remove('show'); } */
   if (!valid) return;
 
   const btn = document.getElementById('joinBtn');
@@ -1191,7 +1191,7 @@ async function completeJoin() {
       body: JSON.stringify({
         phone: verifiedPhone,
         name,
-        email
+        /*email*/
       })
     }
   );

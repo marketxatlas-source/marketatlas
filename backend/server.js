@@ -24,15 +24,14 @@ app.post("/api/register", async (req, res) => {
     console.log("REGISTER HIT");
 
     try {
-        const { phone, name, email } = req.body;
+        const { phone, namel } = req.body;
 
         const { data, error } = await supabase
         .from("users")
         .insert([
         {
             phone,
-            name,
-            email
+            name
         }
         ])
         .select();
