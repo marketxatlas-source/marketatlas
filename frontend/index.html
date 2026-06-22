@@ -644,7 +644,13 @@
   opacity: 0.9;
 }
 #screenSuccess {
-  overflow: visible;
+  overflow-y: auto !important;
+  max-height: 90vh;
+  padding-bottom: 20px;
+}
+
+#screenSuccess .wa-preview {
+  overflow-y: visible;
 }
 
 #screenSuccess .wa-preview {
@@ -940,10 +946,12 @@ function scrollToCard() {
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.getElementById('cardWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
-
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.scrollTop = 0;
+  document.getElementById('cardWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
 
 function showToast(msg, duration=3000) {
   const t = document.getElementById('toast');
