@@ -1204,7 +1204,7 @@ const attemptRegister = async (retries = 3) => {
 
   try {
     const data = await attemptRegister();
-
+    console.log("FINAL DATA:", JSON.stringify(data)); // ← add this
     btn.classList.remove('loading');
     btn.disabled = false;
     btn.textContent = 'Join MarketAtlas →';
