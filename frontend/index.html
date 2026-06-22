@@ -1169,33 +1169,38 @@ async function completeJoin() {
   btn.disabled = true;
   btn.textContent = '';
 
-  const attemptRegister = async (retries = 3) => {
+const attemptRegister = async (retries = 3) => {
     try {
-      const response = await fetch(
-        "https://marketatlas-api.onrender.com/api/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: verifiedPhone, name })
+        const response = await fetch(
+            "https://marketatlas-api.onrender.com/api/register",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: verifiedPhone, name })
+            }
+        );
+
+        const data = await response.json();
+
+        // If success, return immediately — don't retry
+        if (data.success) return data;
+
+        // Only retry on server errors, not on bad responses
+        if (!response.ok && retries > 0) {
+            await new Promise(r => setTimeout(r, 3000));
+            return attemptRegister(retries - 1);
         }
-      );
 
-      if (!response.ok && retries > 0) {
-        await new Promise(r => setTimeout(r, 3000));
-        return attemptRegister(retries - 1);
-      }
-
-      const data = await response.json();
-      return data;
+        return data;
 
     } catch (err) {
-      if (retries > 0) {
-        await new Promise(r => setTimeout(r, 3000));
-        return attemptRegister(retries - 1);
-      }
-      throw err;
+        if (retries > 0) {
+            await new Promise(r => setTimeout(r, 3000));
+            return attemptRegister(retries - 1);
+        }
+        throw err;
     }
-  };
+};
 
   try {
     const data = await attemptRegister();
@@ -1231,7 +1236,6 @@ var configuration = {
   widgetId: "36667268764d353537393730",
   tokenAuth: "533334T7i8t6jX6a33ac51P1",
   exposeMethods: true,
-  captchaId: "hcaptcha-container",   // ← add this
 
   success: function(data) {
     console.log("MSG91 initialized", data);
