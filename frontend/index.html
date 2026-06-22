@@ -643,7 +643,14 @@
 .whatsapp-join-btn:hover {
   opacity: 0.9;
 }
+#screenSuccess {
+  overflow: visible;
+}
 
+#screenSuccess .wa-preview {
+  overflow-y: auto;
+  max-height: 400px;
+}
 </style>
 </head>
 <body>
@@ -934,6 +941,8 @@ function scrollToCard() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  document.getElementById('cardWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
 }
 
 function showToast(msg, duration=3000) {
