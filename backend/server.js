@@ -26,34 +26,50 @@ app.post("/api/register", async (req, res) => {
     try {
         const { phone, name } = req.body;
 
-        const { data, error } = await supabase
-        .from("users")
-        .insert([
-        {
-            phone,
-            name
+        if (!phone || !name) {
+            return res.status(400).json({
+                success: false,
+                error: "Phone and name are required"
+            });
         }
-        ])
-        .select();
 
-    if (error) {
-        return res.status(400).json({
-        success: false,
-        error: error.message
+        // Check if user already exists
+        const { data: existing } = await supabase
+            .from("users")
+            .select("id, phone, name")
+            .eq("phone", phone)
+            .single();
+
+        if (existing) {
+            // User already registered — treat as success
+            return res.json({
+                success: true,
+                user: existing,
+                existing: true
+            });
+        }
+
+        const { data, error } = await supabase
+            .from("users")
+            .insert([{ phone, name }])
+            .select();
+
+        if (error) {
+            console.error("Supabase error:", error);
+            return res.status(400).json({
+                success: false,
+                error: error.message
+            });
+        }
+
+        res.json({
+            success: true,
+            user: data[0]
         });
-    }
-
-    res.json({
-        success: true,
-        user: data[0]
-    });
 
     } catch (err) {
-    console.error(err);
-
-    res.status(500).json({
-        success: false
-    });
+        console.error(err);
+        res.status(500).json({ success: false, error: "Internal server error" });
     }
 });
 
