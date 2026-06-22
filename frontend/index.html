@@ -735,7 +735,6 @@
         <span id="resendTimer">Resend in <b id="timerCount">30</b>s</span>
         <button class="resend-btn" id="resendBtn" onclick="resendOTP()" disabled>Resend OTP</button>
       </div>
-      <div class="dev-badge" style="margin-top:12px;">⚙ Integration: Verify code against stored hash (Redis/DB)</div>
     </div>
 
     <!-- STEP 3: PROFILE -->
@@ -1153,13 +1152,16 @@ async function verifyOTP() {
 /* ── STEP 3: COMPLETE JOIN ── */
 async function completeJoin() {
   const name = document.getElementById('nameInput').value.trim();
-  /*const email = document.getElementById('emailInput').value.trim();*/
   const nameErr = document.getElementById('nameErr');
-  /*const emailErr = document.getElementById('emailErr');*/
   let valid = true;
 
-  if (!name || name.length < 2) { nameErr.classList.add('show'); valid = false; } else { nameErr.classList.remove('show'); }
-/* if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { emailErr.classList.add('show'); valid = false; } else { emailErr.classList.remove('show'); } */
+  if (!name || name.length < 2) {
+    nameErr.classList.add('show');
+    valid = false;
+  } else {
+    nameErr.classList.remove('show');
+  }
+
   if (!valid) return;
 
   const btn = document.getElementById('joinBtn');
@@ -1167,73 +1169,61 @@ async function completeJoin() {
   btn.disabled = true;
   btn.textContent = '';
 
-  /*
-   * ── REAL INTEGRATION ──────────────────────────────────────────────────────
-   * POST /api/register  { phone, name, email }
-   * Backend should:
-   *   1. Save user to DB (PostgreSQL / MongoDB)
-   *   2. Call Wati.io API → POST /api/v1/sendSessionMessage or community invite
-   *      WATI Docs: https://docs.wati.io/
-   *      Add to WhatsApp Community (via Meta Cloud API if using official API)
-   *   3. Send welcome private message via Wati bot
-   *   4. Trigger AI welcome message (Claude / GPT via Wati webhook)
-   * ─────────────────────────────────────────────────────────────────────────
-   */
-  try {
+  const attemptRegister = async (retries = 3) => {
+    try {
+      const response = await fetch(
+        "https://marketatlas-api.onrender.com/api/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: verifiedPhone, name })
+        }
+      );
 
-  const response = await fetch(
-    "https://marketatlas-api.onrender.com/api/register",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        phone: verifiedPhone,
-        name,
-        /*email*/
-      })
+      if (!response.ok && retries > 0) {
+        await new Promise(r => setTimeout(r, 3000));
+        return attemptRegister(retries - 1);
+      }
+
+      const data = await response.json();
+      return data;
+
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise(r => setTimeout(r, 3000));
+        return attemptRegister(retries - 1);
+      }
+      throw err;
     }
-  );
+  };
 
-  const data = await response.json();
+  try {
+    const data = await attemptRegister();
 
-  btn.classList.remove('loading');
-  btn.disabled = false;
-  btn.textContent = 'Join MarketAtlas →';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    btn.textContent = 'Join MarketAtlas →';
 
-  if (data.success) {
+    if (data.success) {
+      const firstName = name.split(' ')[0];
+      document.getElementById('successMsg').textContent =
+        `Welcome, ${firstName}! Your account has been created successfully.`;
+      document.getElementById('waBubbleName').textContent = firstName;
+      showScreen('screenSuccess');
+      showToast('🎉 Welcome to MarketAtlas!');
+    } else {
+      showToast(data.error || 'Failed to save user');
+    }
 
-    const firstName = name.split(' ')[0];
-
-    document.getElementById('successMsg').textContent =
-      `Welcome, ${firstName}! Your account has been created successfully.`;
-
-    document.getElementById('waBubbleName').textContent =
-      firstName;
-
-    showScreen('screenSuccess');
-
-    showToast('🎉 Welcome to MarketAtlas!');
-
-  } else {
-
-    showToast('Failed to save user');
-
+  } catch (error) {
+    console.error(error);
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    btn.textContent = 'Join MarketAtlas →';
+    showToast('Server connection failed. Please try again.');
   }
-
-} catch (error) {
-
-  console.error(error);
-
-  btn.classList.remove('loading');
-  btn.disabled = false;
-  btn.textContent = 'Join MarketAtlas →';
-
-  showToast('Server connection failed');
-
 }
-}
+
 </script>
 
 <script>

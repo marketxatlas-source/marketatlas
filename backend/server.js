@@ -19,6 +19,13 @@ app.get("/", (req, res) => {
     res.send("Backend Running");
 });
 
+app.get("/api/register", (req, res) => {
+    res.status(405).json({ 
+        success: false, 
+        error: "Method not allowed. Use POST." 
+    });
+});
+
 // Register user
 app.post("/api/register", async (req, res) => {
     console.log("REGISTER HIT");
