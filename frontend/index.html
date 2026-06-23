@@ -272,6 +272,64 @@
     width: 100%;
   }
   .input-wrap input::placeholder { color: var(--white-mute); font-size: 14px; }
+  .terms-wrap{
+  margin-top:15px;
+  text-align:left;
+}
+
+.terms-label{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  font-size:13px;
+  color:#ccc;
+}
+
+.terms-label a{
+  color:#25D366;
+  text-decoration:none;
+  font-weight:600;
+}
+
+.terms-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  display:none;
+  z-index:9999;
+}
+
+.terms-modal.show{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.terms-content{
+  width:90%;
+  max-width:700px;
+  max-height:80vh;
+  overflow-y:auto;
+  background:#111;
+  border-radius:12px;
+  padding:20px;
+  color:#fff;
+}
+
+.terms-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.terms-header button{
+  background:none;
+  border:none;
+  color:white;
+  font-size:22px;
+  cursor:pointer;
+}
+
 
   input[type="text"].plain, input[type="email"].plain {
     background: var(--indigo-deep);
@@ -743,7 +801,23 @@
         <input type="tel" maxlength="1" class="otp-box" />
       </div>
       <div class="error-msg" id="otpErr">Incorrect OTP. Please try again.</div>
-      <button class="btn" id="verifyBtn" onclick="verifyOTP()">Verify OTP</button>
+
+<div class="terms-wrap">
+  <label class="terms-label">
+    <input type="checkbox" id="termsCheckbox">
+
+    <span>
+      I agree to the
+      <a href="#" onclick="openTerms(event)">
+        Terms & Conditions
+      </a>
+    </span>
+  </label>
+</div>
+
+<button class="btn" id="verifyBtn" onclick="verifyOTP()">
+  Verify OTP
+</button>
       <div class="resend-row">
         <span id="resendTimer">Resend in <b id="timerCount">30</b>s</span>
         <button class="resend-btn" id="resendBtn" onclick="resendOTP()" disabled>Resend OTP</button>
@@ -770,7 +844,7 @@
         <input type="email" class="plain" id="emailInput" placeholder="username@example.com" />
         <div class="error-msg" id="emailErr">Please enter a valid email address.</div>
       </div>-->
-      <!-- <div class="dev-badge" style="margin-bottom:16px;">⚙ Integration: Wati.io API → Add to community & create private chat</div>-->
+      <!-- <div class="dev-badge" style="margin-bottom:16px;">⚙ Integration: Wati.io API → Add to community & create private chat--></div>
       <button class="btn" id="joinBtn" onclick="completeJoin()">Join MarketAtlas →</button>
     </div>
   </div>
@@ -916,6 +990,56 @@
 
 <!-- ─── TOAST ─── -->
 <div class="toast" id="toast"></div>
+
+<!-- ─── Terms and Conditions ─── -->
+<div id="termsModal" class="terms-modal">
+  <div class="terms-content">
+
+    <div class="terms-header">
+      <h2>Terms & Conditions</h2>
+      <button onclick="closeTerms()">✕</button>
+    </div>
+
+    <div class="terms-body">
+
+      <h3>Terms & Conditions and Disclaimer</h3>
+
+      <p>
+        MarketAtlas is an educational and informational platform designed to provide stock market insights, market updates, research content, analytics, and learning resources. The information shared on this platform is intended solely for educational purposes and should not be construed as definite financial, investment, legal, tax, or professional advice.
+      </p>
+
+      <p>
+        MarketAtlas does not provide personalized investment recommendations or portfolio management services. Any market commentary, research, stock discussions, watchlists, price targets, technical analysis, or other content available on the platform represents general information and should not be considered a recommendation to buy, sell, or hold any security or financial instrument.
+      </p>
+
+      <p>
+        Investments in securities and financial markets are subject to market risks, including the possible loss of principal. Past performance is not indicative of future results.
+      </p>
+
+      <p>
+        All investment and trading decisions made by users are solely their own responsibility.
+      </p>
+
+      <p>
+        MarketAtlas, its owners, employees, affiliates, partners, and contributors shall not be liable for any direct, indirect, incidental, consequential, special, or punitive damages, losses, or expenses arising from the use of, reliance upon, or inability to use the information, tools, services, or content provided through the platform.
+      </p>
+
+      <p>
+        By registering, accessing, or using MarketAtlas and Market Insights WhatsApp Channel, users acknowledge that they have read, understood, and agreed to these Terms & Conditions and Disclaimer.
+      </p>
+
+      <h3>Disclaimer</h3>
+
+      <p>
+        <strong>
+        MarketAtlas is an educational platform. Investments in the securities market are subject to market risks. Please read all related documents carefully before investing. Users are advised to consult qualified financial professionals before making investment decisions. MarketAtlas shall not be responsible for any financial losses incurred as a result of investment or trading decisions made by users.
+        </strong>
+      </p>
+
+    </div>
+
+  </div>
+</div>
 
 <script>
 /* ── TICKER DATA ── */
@@ -1132,6 +1256,16 @@ function resendOTP() {
 /* ── STEP 2: VERIFY OTP ── */
 async function verifyOTP() {
 
+  const termsCheckbox =
+    document.getElementById('termsCheckbox');
+
+  if (!termsCheckbox.checked) {
+    showToast(
+      'Please accept the Terms & Conditions to continue'
+    );
+    return;
+  }
+
   const boxes =
     document.querySelectorAll('.otp-box');
 
@@ -1177,7 +1311,6 @@ async function verifyOTP() {
     }
   );
 }
-
   
 /* ── STEP 3: COMPLETE JOIN ── */
 async function completeJoin() {
