@@ -1395,6 +1395,17 @@ const attemptRegister = async (retries = 3) => {
 </script>
 
 <script>
+function openTerms(event) {
+  event.preventDefault();
+  document.getElementById('termsModal').classList.add('show');
+}
+
+function closeTerms() {
+  document.getElementById('termsModal').classList.remove('show');
+}
+</script>
+
+<script>
 var configuration = {
   widgetId: "36667268764d353537393730",
   tokenAuth: "533334T7i8t6jX6a33ac51P1",
