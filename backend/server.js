@@ -93,6 +93,28 @@ app.post("/api/test", (req, res) => {
     });
 });
 
+app.post("/api/check-user", async (req, res) => {
+    const { phone } = req.body;
+
+    const { data, error } = await supabase
+        .from("users")
+        .select("id")
+        .eq("phone", phone)
+        .limit(1);
+
+    if (error) {
+        return res.status(500).json({
+        success: false,
+        error: error.message
+        });
+    }
+
+    return res.json({
+        success: true,
+        exists: data.length > 0
+    });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

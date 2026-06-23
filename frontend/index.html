@@ -776,7 +776,12 @@
           <div class="input-prefix">🇮🇳 +91</div>
           <input type="tel" id="phoneInput" maxlength="10" placeholder="Your 10 digit phone number" oninput="this.value=this.value.replace(/\D/g,'')" />
         </div>
-        <div class="error-msg" id="phoneErr">Please enter a valid 10-digit mobile number.</div>
+        <div class="error-msg" id="phoneErr">
+          Please enter a valid 10-digit mobile number.
+        </div>
+        <div class="error-msg" id="duplicatePhoneErr">
+          This number is already registered with MarketAtlas.
+        </div>
       </div>
       <!--<div class="dev-badge">⚙ Integration: Twilio / MSG91 SMS OTP API</div>-->
       <button class="btn" id="sendOtpBtn" onclick="sendOTP()" style="margin-top:20px;">Send OTP</button>
@@ -1103,12 +1108,19 @@ async function sendOTP() {
   const err =
     document.getElementById('phoneErr');
 
+  const duplicateErr =
+    document.getElementById('duplicatePhoneErr');
+
+  err.classList.remove('show');
+
+  if (duplicateErr) {
+    duplicateErr.classList.remove('show');
+  }
+
   if (!/^\d{10}$/.test(phone)) {
     err.classList.add('show');
     return;
   }
-
-  err.classList.remove('show');
 
   const btn =
     document.getElementById('sendOtpBtn');
@@ -1119,6 +1131,36 @@ async function sendOTP() {
 
   try {
 
+    /* CHECK IF USER ALREADY EXISTS */
+    const checkRes = await fetch(
+      'https://marketatlas-api.onrender.com/api/check-user',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ phone })
+      }
+    );
+
+    const checkData = await checkRes.json();
+
+    if (checkData.exists) {
+
+      if (duplicateErr) {
+        duplicateErr.classList.add('show');
+      }
+
+      showToast('This number is already registered');
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      btn.textContent = 'Send OTP';
+
+      return;
+    }
+
+    /* SEND OTP */
     window.sendOtp(
       "91" + phone,
 
@@ -1151,8 +1193,6 @@ async function sendOTP() {
 
         console.error(error);
 
-        //showToast('Failed to send OTP');
-
         btn.classList.remove('loading');
         btn.disabled = false;
         btn.textContent = 'Send OTP';
@@ -1163,14 +1203,13 @@ async function sendOTP() {
 
     console.error(err);
 
-    showToast('MSG91 failed');
+    showToast('Unable to verify phone number');
 
     btn.classList.remove('loading');
     btn.disabled = false;
     btn.textContent = 'Send OTP';
   }
 }
-
 /* ── OTP INPUT LOGIC ── */
 function setupOTPInputs() {
   const boxes = document.querySelectorAll('.otp-box');
@@ -1342,9 +1381,6 @@ const attemptRegister = async (retries = 3) => {
         );
 
         const data = await response.json();
-
-        // If success, return immediately — don't retry
-        if (data.success) return data;
 
         // Only retry on server errors, not on bad responses
         if (!response.ok && retries > 0) {
