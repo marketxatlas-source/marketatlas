@@ -43,21 +43,25 @@ app.post("/api/register", async (req, res) => {
             });
         }
 
-        // Check if user already exists
-        const { data: existing } = await supabase
-            .from("users")
-            .select("id, phone, name")
-            .eq("phone", phone)
-            .single();
+        const { data: existing, error: existingError } = await supabase
+    .from("users")
+    .select("id")
+    .eq("phone", phone)
+    .limit(1);
 
-        if (existing) {
-            // User already registered — treat as success
-            return res.json({
-                success: true,
-                user: existing,
-                existing: true
-            });
-        }
+if (existingError) {
+    return res.status(500).json({
+        success: false,
+        error: existingError.message
+    });
+}
+
+if (existing && existing.length > 0) {
+    return res.status(409).json({
+        success: false,
+        error: "User already exists"
+    });
+}
 
         const { data, error } = await supabase
             .from("users")
