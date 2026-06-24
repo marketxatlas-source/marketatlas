@@ -3,7 +3,8 @@ require("dotenv").config();
 const { createClient } = require("@supabase/supabase-js");
 const express = require("express");
 const cors = require("cors");
-
+const jwt = require("jsonwebtoken");
+const { Parser } = require("json2csv");
 const app = express();
 
 app.use(cors());
@@ -118,6 +119,127 @@ app.post("/api/check-user", async (req, res) => {
         exists: data.length > 0
     });
 });
+
+/* ===== ADMIN MIDDLEWARE ===== */
+function verifyAdmin(req, res, next) {
+
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+        return res.status(401).json({
+            success: false,
+            error: "Unauthorized"
+        });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+        next();
+    } catch {
+        return res.status(401).json({
+            success: false,
+            error: "Invalid token"
+        });
+    }
+}
+
+/* ===== ADMIN LOGIN ===== */
+app.post("/api/admin/login", (req, res) => {
+
+    const { username, password } = req.body;
+
+    if (
+        username === process.env.ADMIN_USERNAME &&
+        password === process.env.ADMIN_PASSWORD
+    ) {
+        const token = jwt.sign(
+            { role: "admin" },
+            process.env.JWT_SECRET,
+            { expiresIn: "24h" }
+        );
+
+        return res.json({
+            success: true,
+            token
+        });
+    }
+
+    return res.status(401).json({
+        success: false,
+        error: "Invalid credentials"
+    });
+});
+
+/* ===== GET USERS ===== */
+app.get("/api/admin/users", verifyAdmin, async (req, res) => {
+
+    const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+
+    return res.json({
+        success: true,
+        users: data
+    });
+});
+
+/* ===== STATS ===== */
+app.get("/api/admin/stats", verifyAdmin, async (req, res) => {
+
+    const { count, error } = await supabase
+        .from("users")
+        .select("*", {
+            count: "exact",
+            head: true
+        });
+
+    if (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+
+    return res.json({
+        success: true,
+        totalUsers: count
+    });
+});
+
+/* ===== EXPORT CSV ===== */
+app.get("/api/admin/export-users", verifyAdmin, async (req, res) => {
+
+    const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+
+    const parser = new Parser();
+    const csv = parser.parse(data);
+
+    res.header("Content-Type", "text/csv");
+    res.attachment("marketatlas-users.csv");
+
+    return res.send(csv);
+});
+
 
 const PORT = process.env.PORT || 5000;
 
