@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>MarketAtlas Dashboard</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0f172a;
+    color:white;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px;
+}
+
+.card{
+    background:#1e293b;
+    margin:20px;
+    padding:20px;
+    border-radius:12px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:12px;
+    border-bottom:1px solid #334155;
+    text-align:left;
+}
+
+input{
+    padding:10px;
+    width:300px;
+    margin:20px;
+}
+
+button{
+    padding:10px 16px;
+    cursor:pointer;
+}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+
+    <h1>MarketAtlas Dashboard</h1>
+
+    <button onclick="logout()">
+        Logout
+    </button>
+
+</div>
+
+<div class="card">
+    <h2>Total Users</h2>
+    <h1 id="totalUsers">0</h1>
+</div>
+
+<input
+    type="text"
+    id="search"
+    placeholder="Search user..."
+    onkeyup="filterUsers()"
+/>
+
+<div class="card">
+
+    <button onclick="downloadCSV()">
+        Export CSV
+    </button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Joined</th>
+            </tr>
+        </thead>
+
+        <tbody id="usersTable">
+        </tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+const token =
+localStorage.getItem("adminToken");
+
+if(!token){
+    window.location.href =
+    "admin-login.html";
+}
+
+let users=[];
+
+async function loadUsers(){
+
+    const response = await fetch(
+        "https://marketatlas-api.onrender.com/api/admin/users",
+        {
+            headers:{
+                Authorization:
+                `Bearer ${token}`
+            }
+        }
+    );
+
+    const data =
+    await response.json();
+
+    users = data.users;
+
+    document.getElementById(
+        "totalUsers"
+    ).innerText = users.length;
+
+    renderUsers(users);
+}
+
+function renderUsers(list){
+
+    const tbody =
+    document.getElementById(
+        "usersTable"
+    );
+
+    tbody.innerHTML="";
+
+    list.forEach(user=>{
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${user.name}</td>
+            <td>${user.phone}</td>
+            <td>${new Date(user.created_at).toLocaleDateString()}</td>
+        </tr>
+        `;
+    });
+}
+
+function filterUsers(){
+
+    const term =
+    document.getElementById(
+        "search"
+    ).value.toLowerCase();
+
+    const filtered =
+    users.filter(u =>
+        u.name.toLowerCase().includes(term) ||
+        u.phone.includes(term)
+    );
+
+    renderUsers(filtered);
+}
+
+async function downloadCSV(){
+
+    const response =
+    await fetch(
+        "https://marketatlas-api.onrender.com/api/admin/export-users",
+        {
+            headers:{
+                Authorization:
+                `Bearer ${token}`
+            }
+        }
+    );
+
+    const blob =
+    await response.blob();
+
+    const url =
+    window.URL.createObjectURL(blob);
+
+    const a =
+    document.createElement("a");
+
+    a.href=url;
+
+    a.download=
+    "marketatlas-users.csv";
+
+    a.click();
+}
+
+function logout(){
+
+    localStorage.removeItem(
+        "adminToken"
+    );
+
+    window.location.href =
+    "admin-login.html";
+}
+
+loadUsers();
+
+</script>
+
+</body>
+</html>
